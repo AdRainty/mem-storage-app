@@ -3,6 +3,9 @@ import store from '@/store'
 
 // home
 const home = () => import('../views/HomeView.vue')
+const index = () => import('../views/main/Index.vue')
+const message = () => import('../views/main/Message.vue')
+const setting = () => import('../views/main/Setting.vue')
 
 // error
 const page404 = () => import('../views/error/404.vue')
@@ -11,10 +14,19 @@ const page404 = () => import('../views/error/404.vue')
 const login = () => import('../views/system/Login.vue')
 
 const routes = [
-    { path: '/home', name: 'home', component: home, meta: { requireAuth: true } },
     { path: '/login', name: 'login', component: login },
     { path: '/404', name: '404', component: page404 },
-    { path: '/:error*', name: 'error', redirect: '/404' }
+    { path: '/:error*', name: 'error', redirect: '/404' },
+    {
+        path: '/home',
+        name: 'home',
+        component: home,
+        children: [
+            { path: '/index', name: 'index', component: index },
+            { path: '/message', name: 'message', component: message },
+            { path: '/setting', name: 'setting', component: setting }
+        ]
+    }
 ]
 
 const router = createRouter({

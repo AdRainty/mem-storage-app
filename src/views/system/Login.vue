@@ -42,7 +42,7 @@ import { User, Lock } from '@element-plus/icons-vue'
 import store from '@/store'
 import { loadFull } from 'tsparticles'
 import { options } from '@/utils/option'
-import { getCurrentInstance } from 'vue'
+import { getCurrentInstance, shallowRef } from 'vue'
 import { ElMessage } from 'element-plus'
 
 export default {
@@ -55,8 +55,8 @@ export default {
                 password: '',
                 uuid: ''
             },
-            User,
-            Lock
+            User: shallowRef(User),
+            Lock: shallowRef(Lock)
         }
     },
     setup () {

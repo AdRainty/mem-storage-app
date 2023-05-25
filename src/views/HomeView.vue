@@ -1,18 +1,48 @@
 <template>
-    <div class="home">
-        <img alt="Vue logo" src="../assets/logo.png">
-        <HelloWorld msg="Welcome to Your Vue.js App" />
+    <div class="common-layout">
+        <el-container>
+            <el-header class="header-class">
+                <Header />
+            </el-header>
+            <el-container class="container-class">
+                <el-aside width="200px">
+                    <Aside :callback="handleRouterView"/>
+                </el-aside>
+                <el-main>
+                    <RouterView />
+                </el-main>
+            </el-container>
+        </el-container>
     </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import Header from './layout/Header.vue'
+import Aside from './layout/Aside.vue'
 
 export default {
     name: 'HomeView',
     components: {
-        HelloWorld
+        Header,
+        Aside
+    },
+    methods: {
+        handleRouterView (view) {
+            console.log(view)
+            this.$router.push({ path: `/${view}` })
+        }
     }
 }
 </script>
+
+<style scoped>
+
+.header-class{
+    margin-top: 20px;
+}
+
+.container-class{
+    margin-top: 10px;
+}
+
+</style>

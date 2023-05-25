@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
+const { session } = require('electron')
 
 const createWindow = () => {
   // 创建浏览窗口

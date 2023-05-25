@@ -76,10 +76,30 @@ const $post = (url, params) => {
     })
 }
 
+/**
+ * post方法，对应post请求
+ * @param {String} 请求的url地址
+ * @param {Object} 请求时携带的参数
+ */
+const $upload = (url, params) => {
+    return new Promise((resolve, reject) => {
+        axios.post(url, QS.stringify(params), {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(res => {
+            resolve(res.data)
+        }).catch(err => {
+            reject(err.data)
+        })
+    })
+}
+
 export default {
     install: (app) => {
         app.config.globalProperties.$get = $get
         app.config.globalProperties.$post = $post
         app.config.globalProperties.$axios = axios
+        app.config.globalProperties.$upload = $upload
     }
 }
