@@ -3,7 +3,7 @@
         <el-menu
             default-active="index"
             class="el-menu-vertical-demo"
-            @open="handleOpen"
+            @select="handleOpen"
         >
             <el-menu-item index="index">
                 <el-icon><House /></el-icon>

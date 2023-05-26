@@ -18,9 +18,10 @@ const routes = [
     { path: '/404', name: '404', component: page404 },
     { path: '/:error*', name: 'error', redirect: '/404' },
     {
-        path: '/home',
+        path: '/',
         name: 'home',
         component: home,
+        redirect: '/index',
         children: [
             { path: '/index', name: 'index', component: index },
             { path: '/message', name: 'message', component: message },
