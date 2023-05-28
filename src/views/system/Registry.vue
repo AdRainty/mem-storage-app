@@ -1,54 +1,45 @@
 <template>
     <div class="login-container">
         <div class="admin-login-background">
-            <el-form class="login-form" :model="loginForm" label-width="60px">
-                <h1 class="logo-title">Login</h1>
+            <el-form class="login-form" :model="registryForm" label-width="60px">
+                <h1 class="logo-title">Registry</h1>
                 <el-form-item class="login-form-item" label="Usename">
-                    <el-input
-                        :prefix-icon="User"
-                        v-model="loginForm.username"
-                    />
+                    <el-input :prefix-icon="User" v-model="registryForm.username" />
                 </el-form-item>
-                <el-form-item
-                    class="login-form-item"
-                    label="Password"
-                    prop="pass"
-                >
-                    <el-input
-                        :prefix-icon="Lock"
-                        v-model="loginForm.password"
-                        type="password"
-                        autocomplete="off"
-                    />
+                <el-form-item class="login-form-item" label="Password" prop="pass">
+                    <el-input :prefix-icon="Lock" v-model="registryForm.password" type="password" autocomplete="off" />
+                </el-form-item>
+                <el-form-item class="login-form-item" label="Telephone">
+                    <el-input :prefix-icon="Iphone" v-model="registryForm.telephone" />
                 </el-form-item>
                 <el-form-item class="login-form-item">
-                    <el-button type="primary" @click="handleLogin"
-                        >Login</el-button
-                    >
+                    <el-button type="primary" @click="handleRegistry">Registry</el-button>
                 </el-form-item>
-                <el-link type="primary" @click="handleSwitchRegistry">Don't have count?</el-link>
+                <el-link type="primary" @click="handleSwitchLogin">Already have account?</el-link>
             </el-form>
         </div>
     </div>
 </template>
 
 <script>
-import { User, Lock } from '@element-plus/icons-vue'
-import { JSEncrypt } from 'jsencrypt'
+import { User, Lock, Iphone } from '@element-plus/icons-vue'
 import store from '@/store'
 import { getCurrentInstance, shallowRef } from 'vue'
 import { ElMessage } from 'element-plus'
+import { JSEncrypt } from 'jsencrypt'
 
 export default {
-    name: 'Login',
+    name: 'Registry',
     data () {
         return {
-            loginForm: {
+            registryForm: {
                 username: '',
-                password: ''
+                password: '',
+                telephone: ''
             },
             User: shallowRef(User),
-            Lock: shallowRef(Lock)
+            Lock: shallowRef(Lock),
+            Iphone: shallowRef(Iphone)
         }
     },
     props: {
@@ -66,13 +57,13 @@ export default {
         this.getPublicKey()
     },
     methods: {
-        handleLogin () {
+        handleRegistry () {
             const encryptor = new JSEncrypt()
             const publicKey = store.state.publicKey
             encryptor.setPublicKey(publicKey)
-            this.loginForm.password = encryptor.encrypt(this.loginForm.password)
-            this.proxy.$post('/api/authority/login', this.loginForm).then(r => {
-                if (r.code === 0) {
+            this.registryForm.password = encryptor.encrypt(this.registryForm.password)
+            this.proxy.$post('/api/authority/registry', this.registryForm).then(r => {
+                if (r.code === 200) {
                     store.state.token = r.token
                     if (this.redirect === '') {
                         this.$router.push('/index')
@@ -87,8 +78,8 @@ export default {
                 ElMessage.error('Network Error.')
             })
         },
-        handleSwitchRegistry () {
-            this.callback('registry')
+        handleSwitchLogin () {
+            this.callback('login')
         },
         getPublicKey () {
             this.proxy.$get('/api/authority/publicKey').then(r => {
@@ -122,16 +113,19 @@ export default {
     margin-left: -180px;
     margin-top: -100px;
 }
+
 .logo-title {
     text-align: center;
     letter-spacing: 2px;
     padding: 14px 0;
 }
+
 .logo-title h1 {
     color: #1e9fff;
     font-size: 25px;
     font-weight: bold;
 }
+
 .login-form {
     background-color: #fff;
     border: 1px solid #fff;
@@ -139,9 +133,11 @@ export default {
     padding: 14px 20px;
     box-shadow: 0 0 8px #eeeeee;
 }
+
 .login-form .login-form-item {
     position: relative;
 }
+
 .login-form .login-form-item label {
     position: absolute;
     left: 1px;
@@ -151,6 +147,7 @@ export default {
     text-align: center;
     color: #d2d2d2;
 }
+
 .login-form .login-form-item input {
     padding-left: 36px;
 }

@@ -3,7 +3,7 @@ import router from '@/router'
 import QS from 'qs'
 import store from '@/store'
 
-axios.defaults.baseURL = 'http://localhost:8888'
+axios.defaults.baseURL = 'http://localhost:9500'
 
 axios.interceptors.request.use(
     async config => {
@@ -68,7 +68,7 @@ const $get = (url, params) => {
  */
 const $post = (url, params) => {
     return new Promise((resolve, reject) => {
-        axios.post(url, QS.stringify(params)).then(res => {
+        axios.post(url, params).then(res => {
             resolve(res.data)
         }).catch(err => {
             reject(err.data)
