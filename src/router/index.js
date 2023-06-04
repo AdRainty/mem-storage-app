@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '@/store'
 
 // home
 const home = () => import('../views/HomeView.vue')
@@ -37,7 +36,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _, next) => {
-    if (to.path === '/login' && store.state.token !== undefined && store.state.token !== '') {
+    if (to.path === '/login' && localStorage.token !== undefined && localStorage.token !== '') {
         console.log(1)
         // 如果请求路径为login, 但是带了token, 跳转到首页
         next({
@@ -46,7 +45,7 @@ router.beforeEach((to, _, next) => {
     } else if (to.meta.requireAuth) {
         console.log(2)
         // 如果请求需要权限, 但是没带token, 跳转到登录页
-        if (store.state.token === undefined || store.state.token === '') {
+        if (localStorage.token === undefined || localStorage.token === '') {
             next({
                 path: '/login',
                 query: { redirect: to.fullPath }

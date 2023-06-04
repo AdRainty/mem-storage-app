@@ -34,8 +34,8 @@
 
 <script>
 import { User, Lock } from '@element-plus/icons-vue'
-import { JSEncrypt } from 'jsencrypt'
 import store from '@/store'
+import { JSEncrypt } from 'jsencrypt'
 import { getCurrentInstance, shallowRef } from 'vue'
 import { ElMessage } from 'element-plus'
 
@@ -73,7 +73,8 @@ export default {
             this.loginForm.password = encryptor.encrypt(this.loginForm.password)
             this.proxy.$post('/api/authority/login', this.loginForm).then(r => {
                 if (r.code === 0) {
-                    store.state.token = r.token
+                    localStorage.token = r.token
+                    this.getUserInfo()
                     if (this.redirect === '') {
                         this.$router.push('/index')
                     } else {
@@ -84,7 +85,20 @@ export default {
                 }
             }).catch(e => {
                 console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error('System Error.')
+            })
+        },
+        getUserInfo() {
+            this.proxy.$get('/api/user/userInfo').then(r => {
+                if (r.code === 0) {
+                    console.log(r.user.username)
+                    localStorage.username = r.user.username
+                } else {
+                    ElMessage.error(r.msg)
+                }
+            }).catch(e => {
+                console.log(e)
+                ElMessage.error('System Error.')
             })
         },
         handleSwitchRegistry () {

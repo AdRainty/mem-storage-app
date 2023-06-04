@@ -3,6 +3,11 @@
         <div class="button-view">
             <div>
                 <el-row class="mb-4">
+                    <el-button type="primary" round @click="listFiles">
+                        <el-icon>
+                            <RefreshLeft />
+                        </el-icon>刷新
+                    </el-button>
                     <el-button type="primary" round @click="dialogVisible = true">
                         <el-icon class="el-icon--left">
                             <UploadFilled />
@@ -45,7 +50,7 @@
                         <span style="margin-left: 10px"> 已选择 {{ selector.length }} 个文件 </span>
                     </div>
                     <el-input v-model="keyword" style="width: 20%; position: absolute; right: 0%" placeholder="Please Input"
-                        :suffix-icon="Search" />
+                        :suffix-icon="Search" @keyup.enter="handleKeyWorldSearch" />
                 </el-row>
             </div>
         </div>
@@ -93,16 +98,18 @@
                 <el-table-column property="updateTime" label="时间" sortable="custom">
                     <template #default="scope">{{ scope.row.updateTime }}</template>
                 </el-table-column>
-                <el-table-column property="type" label="类型" sortable="custom">
-                    <template #default="scope">{{ getFileType(scope.row.type)['name'] }}</template>
-                </el-table-column>
                 <el-table-column property="size" label="大小" sortable="custom" />
                 <el-table-column property="operations" label="操作">
-                    <template #default>
+                    <template #default="scope">
                         <el-button-group class="ml-4">
                             <el-button type="primary" :icon="Share" />
-                            <el-button type="primary" :icon="Download" />
-                            <el-button type="primary" :icon="Delete" />
+                            <el-button type="primary" :icon="Download" @click="handleDownload(scope.row)"
+                                v-if="getFileType(scope.row.type)['name'] !== '文件夹'" />
+                            <el-popconfirm :title="`你确定要删除${scope.row.name}?`" @confirm="handleDelete(scope.row.id)">
+                                <template #reference>
+                                    <el-button type="primary" :icon="Delete" />
+                                </template>
+                            </el-popconfirm>
                         </el-button-group>
                     </template>
                 </el-table-column>
@@ -136,7 +143,12 @@ export default {
             selector: [],
             paths: ['/我的网盘'],
             pathsCur: 0,
-            dialogVisible: false
+            dialogVisible: false,
+            sortable: {
+                name: '',
+                updateTime: '',
+                size: ''
+            }
         }
     },
     setup() {
@@ -149,7 +161,7 @@ export default {
             3: { name: '音频', icon: 'Headset' },
             4: { name: '压缩包', icon: 'Collection' },
             5: { name: '图片', icon: 'Picture' },
-            6: { name: '其他', icon: 'Files' }
+            9: { name: '其他', icon: 'Files' }
         }
 
         return {
@@ -160,22 +172,24 @@ export default {
         this.listFiles()
     },
     methods: {
-        httpRequest (options) {
+        httpRequest(options) {
             console.log(options.file)
-            const file = options.file
-            const files = []
-            files.push(file)
-            this.proxy.$post(`/api/file/upload?path=${this.paths[this.pathsCur]}`, {
+            const files = options.file
+            this.proxy.$upload(`/api/file/upload?path=${this.paths[this.pathsCur]}`, {
                 files
             }).then(r => {
-                console.log(r)
-                this.fileList = r.list
+                if (r.code === 0) {
+                    ElMessage.success('Upload Success.')
+                    this.listFiles()
+                    this.$refs.upload.clearFiles()
+                    this.dialogVisible = false
+                }
             }).catch(e => {
                 console.log(e)
                 ElMessage.error('Network Error.')
             })
         },
-        submitUpload () {
+        submitUpload() {
             this.$refs.upload.submit()
             // console.log(this.$refs.upload)
             // console.log(this.uploadFiles)
@@ -183,6 +197,16 @@ export default {
         handleSelectionChange(val) {
             this.selector = val
             this.isSelect = this.selector.length > 0
+        },
+        handleKeyWorldSearch() {
+            const path = this.paths[this.pathsCur]
+            this.proxy.$get('/api/file/keyword', { keyword: this.keyword, path }).then(r => {
+                console.log(r)
+                this.fileList = r.list
+            }).catch(e => {
+                console.log(e)
+                ElMessage.error('Network Error.')
+            })
         },
         handleAddFloder() {
             ElMessageBox.prompt('请输入文件夹名称', '提示', {
@@ -211,7 +235,14 @@ export default {
         listFiles() {
             const path = this.paths[this.pathsCur]
             console.log('request', path)
-            this.proxy.$get('/api/file/list', { path }).then(r => {
+            let url = '/api/file/list?'
+            let i = 1
+            for (const ind in this.sortable) {
+                if (i !== 1) url += '&'
+                url += `${ind}=${this.sortable[ind]}`
+                i += 1
+            }
+            this.proxy.$get(url, { path }).then(r => {
                 console.log(r)
                 this.fileList = r.list
             }).catch(e => {
@@ -247,8 +278,28 @@ export default {
             console.log(ret)
             return ret
         },
-        handleSort(name, order) {
-            console.log(name, order)
+        handleSort(item) {
+            this.sortable[item.prop] = item.order === null ? '' : item.order
+            this.listFiles()
+        },
+        handleDownload(item) {
+            console.log(item.id)
+            window.location.href = `http://localhost:9500/api/file/download?fileId=${item.id}`
+        },
+        handleDelete(fileId) {
+            this.proxy.$get('/api/file/delete', { fileId }).then(r => {
+                console.log(r)
+                if (r.code === 0) {
+                    ElMessage({
+                        type: 'success',
+                        message: '删除文件成功'
+                    })
+                    this.listFiles()
+                }
+            }).catch(e => {
+                console.log(e)
+                ElMessage.error('Network Error.')
+            })
         }
     }
 }

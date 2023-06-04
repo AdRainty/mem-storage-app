@@ -1,12 +1,7 @@
 <template>
     <div class="message">
         <el-row class="mb-4">
-            <el-input
-                v-model="keyword"
-                style="width: 80%"
-                placeholder="Please Input"
-                :suffix-icon="Search"
-            />
+            <el-input v-model="keyword" style="width: 80%" placeholder="Please Input" :suffix-icon="Search" />
             <el-button type="info" style="margin-left: 10px">+</el-button>
         </el-row>
         <el-menu class="el-menu-vertical-demo" style="margin-top: 10px" @select="handleOpen">
@@ -22,11 +17,11 @@
 
 <script>
 import { Search } from '@element-plus/icons-vue'
-import { shallowRef } from 'vue'
+import { getCurrentInstance, shallowRef } from 'vue'
 
 export default {
     name: 'Friend',
-    data () {
+    data() {
         return {
             Search: shallowRef(Search),
             squareUrl: '',
@@ -36,8 +31,22 @@ export default {
     props: {
         callback: { type: Function }
     },
+    setup() {
+        const { proxy } = getCurrentInstance()
+
+        return {
+            proxy
+        }
+    },
+    mounted() {
+        this.proxy.$get('/api/im/group/searchGroupTalk').then(r => {
+            console.log(r)
+        }).catch(e => {
+            console.log(e)
+        })
+    },
     methods: {
-        handleOpen (key, _) {
+        handleOpen(key, _) {
             this.callback(key)
         }
     }

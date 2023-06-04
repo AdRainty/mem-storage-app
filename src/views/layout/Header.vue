@@ -12,7 +12,7 @@
                     <div class="demo-rich-conent" style="display: flex; gap: 16px; flex-direction: column">
                         <div>
                             <p class="demo-rich-content__name" style="margin: 0; font-weight: 500">
-                                admin
+                                {{ username }}
                             </p>
                         </div>
 
@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import store from '@/store'
 
 export default {
     name: 'Header',
@@ -35,12 +34,18 @@ export default {
     },
     data () {
         return {
-            avatarUrl: ''
+            avatarUrl: '',
+            username: ''
         }
+    },
+    created () {
+        this.username = localStorage.username
+        this.avatarUrl = localStorage.avatarUrl
     },
     methods: {
         handleLogout () {
-            store.state.token = ''
+            localStorage.token = ''
+            localStorage.user = {}
             this.$router.push('/login')
         }
     }
