@@ -5,11 +5,11 @@
             <el-button type="info" style="margin-left: 10px">+</el-button>
         </el-row>
         <el-menu class="el-menu-vertical-demo" style="margin-top: 10px" @select="handleOpen">
-            <el-menu-item :index="String(item)" v-for="item in 10" :key="item">
-                <el-badge :value="100" :max="99" class="item" :hidden="false">
-                    <el-avatar shape="square" :src="squareUrl" />
+            <el-menu-item :index="String(item.id)" v-for="item in talks" :key="item">
+                <el-badge :value="item.count" :max="99" class="item" :hidden="item.count <= 0">
+                    <el-avatar shape="square" :src="item.avatar" />
                 </el-badge>
-                <span style="margin-left: 5px">聊天{{ item }}</span>
+                <span style="margin-left: 5px">{{ item.name }}</span>
             </el-menu-item>
         </el-menu>
     </div>
@@ -25,7 +25,8 @@ export default {
         return {
             Search: shallowRef(Search),
             squareUrl: '',
-            keyword: ''
+            keyword: '',
+            talks: []
         }
     },
     props: {
@@ -39,7 +40,8 @@ export default {
         }
     },
     mounted() {
-        this.proxy.$get('/api/im/group/searchGroupTalk').then(r => {
+        this.proxy.$get('/api/im/getAllTalk').then(r => {
+            this.talks = r.talk
             console.log(r)
         }).catch(e => {
             console.log(e)

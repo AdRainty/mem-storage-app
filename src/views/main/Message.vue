@@ -5,7 +5,7 @@
                 <Friend :callback="handleSessionChange" />
             </el-aside>
             <el-main>
-                <Session :currentSession="currentSession" />
+                <Session :currentSession="currentSession" v-if="currentSession != undefined"/>
             </el-main>
         </el-container>
     </div>
@@ -14,6 +14,7 @@
 <script>
 import Friend from './Message/Friend.vue'
 import Session from './Message/Session.vue'
+import { getCurrentInstance } from 'vue'
 
 export default {
     name: 'Message',
@@ -23,11 +24,19 @@ export default {
     },
     data () {
         return {
-            currentSession: ''
+            currentSession: undefined
+        }
+    },
+    setup() {
+        const { proxy } = getCurrentInstance()
+
+        return {
+            proxy
         }
     },
     methods: {
         handleSessionChange (view) {
+            console.log(view)
             this.currentSession = view
         }
     }

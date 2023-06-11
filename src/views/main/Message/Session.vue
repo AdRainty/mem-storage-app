@@ -1,7 +1,7 @@
 <template>
     <div class="session">
         <div class="header">
-            <span style="float: left">聊天 {{ currentSession }}</span>
+            <span style="float: left">聊天 {{ currentSession.name }}</span>
             <br />
         </div>
         <el-divider />
@@ -26,15 +26,32 @@
 </template>
 
 <script>
+import { getCurrentInstance } from 'vue'
 
 export default {
     name: 'Session',
     data () {
         return {
+            message: ''
         }
     },
     props: {
         currentSession: { type: String }
+    },
+    setup() {
+        const { proxy } = getCurrentInstance()
+
+        return {
+            proxy
+        }
+    },
+    mounted() {
+        console.log(this.currentSession)
+        this.proxy.$get('/api/im/friend/startTalk', { id: this.currentSession }).then(r => {
+            console.log(r)
+        }).catch(e => {
+            console.log(e)
+        })
     }
 }
 </script>
