@@ -41,11 +41,6 @@
                                 <FolderAdd />
                             </el-icon>批量删除
                         </el-button>
-                        <el-button type="primary" round :disabled="!isSelect" style="margin-left: 10px">
-                            <el-icon class="el-icon--left">
-                                <FolderAdd />
-                            </el-icon>分享所选文件
-                        </el-button>
                         <span style="margin-left: 10px"> 共 {{ fileList.length }} 项 </span>
                         <span style="margin-left: 10px"> 已选择 {{ selector.length }} 个文件 </span>
                     </div>
@@ -102,7 +97,6 @@
                 <el-table-column property="operations" label="操作">
                     <template #default="scope">
                         <el-button-group class="ml-4">
-                            <el-button type="primary" :icon="Share" />
                             <el-button type="primary" :icon="Download" @click="handleDownload(scope.row)"
                                 v-if="getFileType(scope.row.type)['name'] !== '文件夹'" />
                             <el-popconfirm :title="`你确定要删除${scope.row.name}?`" @confirm="handleDelete(scope.row.id)">
@@ -148,7 +142,8 @@ export default {
                 name: '',
                 updateTime: '',
                 size: ''
-            }
+            },
+            socket: undefined
         }
     },
     setup() {
@@ -173,7 +168,6 @@ export default {
     },
     methods: {
         httpRequest(options) {
-            console.log(options.file)
             const files = options.file
             this.proxy.$upload(`/api/file/upload?path=${this.paths[this.pathsCur]}`, {
                 files
@@ -185,14 +179,11 @@ export default {
                     this.dialogVisible = false
                 }
             }).catch(e => {
-                console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error(e)
             })
         },
         submitUpload() {
             this.$refs.upload.submit()
-            // console.log(this.$refs.upload)
-            // console.log(this.uploadFiles)
         },
         handleSelectionChange(val) {
             this.selector = val
@@ -201,11 +192,9 @@ export default {
         handleKeyWorldSearch() {
             const path = this.paths[this.pathsCur]
             this.proxy.$get('/api/file/keyword', { keyword: this.keyword, path }).then(r => {
-                console.log(r)
                 this.fileList = r.list
             }).catch(e => {
-                console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error(e)
             })
         },
         handleAddFloder() {
@@ -214,9 +203,8 @@ export default {
                 cancelButtonText: 'Cancel'
             }).then(({ value }) => {
                 console.log(value)
-                const path = this.paths.join('')
+                const path = this.paths[this.pathsCur]
                 this.proxy.$get('/api/file/newFolder', { folderName: value, path }).then(r => {
-                    console.log(r)
                     if (r.code === 0) {
                         ElMessage({
                             type: 'success',
@@ -225,8 +213,7 @@ export default {
                         this.listFiles()
                     }
                 }).catch(e => {
-                    console.log(e)
-                    ElMessage.error('Network Error.')
+                    ElMessage.error(e)
                 })
             }).catch(() => {
                 console.log('user cancle')
@@ -234,7 +221,6 @@ export default {
         },
         listFiles() {
             const path = this.paths[this.pathsCur]
-            console.log('request', path)
             let url = '/api/file/list?'
             let i = 1
             for (const ind in this.sortable) {
@@ -243,11 +229,9 @@ export default {
                 i += 1
             }
             this.proxy.$get(url, { path }).then(r => {
-                console.log(r)
                 this.fileList = r.list
             }).catch(e => {
-                console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error(e)
             })
         },
         getFileType(code) {
@@ -265,7 +249,6 @@ export default {
             this.listFiles()
         },
         getCurList(path) {
-            console.log('path', path)
             path = path.substring(1)
             const ds = path.split('/')
             console.log(ds)
@@ -275,7 +258,6 @@ export default {
                 pre += '/' + ds[i]
                 ret.push(pre)
             }
-            console.log(ret)
             return ret
         },
         handleSort(item) {
@@ -283,7 +265,6 @@ export default {
             this.listFiles()
         },
         handleDownload(item) {
-            console.log(item.id)
             window.location.href = `http://localhost:9500/api/file/download?fileId=${item.id}`
         },
         handleDelete(fileId) {
@@ -297,8 +278,7 @@ export default {
                     this.listFiles()
                 }
             }).catch(e => {
-                console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error(e)
             })
         }
     }

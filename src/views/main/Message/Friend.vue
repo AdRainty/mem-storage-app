@@ -18,6 +18,7 @@
 <script>
 import { Search } from '@element-plus/icons-vue'
 import { getCurrentInstance, shallowRef } from 'vue'
+import store from '../../../store'
 
 export default {
     name: 'Friend',
@@ -30,7 +31,8 @@ export default {
         }
     },
     props: {
-        callback: { type: Function }
+        callback: { type: Function },
+        currentSession: { type: String }
     },
     setup() {
         const { proxy } = getCurrentInstance()
@@ -47,9 +49,40 @@ export default {
             console.log(e)
         })
     },
+    created() {
+        const that = this
+        store.state.socket.onmessage = function (event) {
+            that.sortTalk(event.data)
+        }
+    },
     methods: {
         handleOpen(key, _) {
+            this.readMessage(key)
             this.callback(key)
+        },
+        readMessage(key) {
+            const filter = this.talks.filter(item => String(item.id) === key)
+            if (filter) {
+                const obj = filter[0]
+                this.proxy.$get(`/api/im/message/readMessage?id=${obj.id}&chatType=0`).then(r => {
+                    console.log(r)
+                }).catch(e => {
+                    console.log(e)
+                })
+                obj.count = 0
+            }
+        },
+        sortTalk(data) {
+            const filter = this.talks.filter(item => String(item.id) === data.sender)
+            if (filter) {
+                const obj = filter[0]
+                if (store.currentSession !== String(obj.id)) {
+                    obj.count += 1
+                    this.talks.sort((a, b) => {
+                        return ((a.count < b.count) ? -1 : 1)
+                    })
+                }
+            }
         }
     }
 }

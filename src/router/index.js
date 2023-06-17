@@ -4,7 +4,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 const home = () => import('../views/HomeView.vue')
 const index = () => import('../views/main/Index.vue')
 const message = () => import('../views/main/Message.vue')
-const setting = () => import('../views/main/Setting.vue')
 
 // error
 const page404 = () => import('../views/error/404.vue')
@@ -23,9 +22,8 @@ const routes = [
         redirect: '/index',
         meta: { requireAuth: true },
         children: [
-            { path: '/index', name: 'index', component: index },
-            { path: '/message', name: 'message', component: message },
-            { path: '/setting', name: 'setting', component: setting }
+            { path: '/index', name: 'index', component: index, meta: { requireAuth: true } },
+            { path: '/message', name: 'message', component: message, meta: { requireAuth: true } }
         ]
     }
 ]
@@ -36,16 +34,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _, next) => {
-    if (to.path === '/login' && localStorage.token !== undefined && localStorage.token !== '') {
-        console.log(1)
+    if (to.path === '/login' && sessionStorage.token !== undefined && sessionStorage.token !== '') {
         // 如果请求路径为login, 但是带了token, 跳转到首页
         next({
             path: '/index'
         })
     } else if (to.meta.requireAuth) {
-        console.log(2)
         // 如果请求需要权限, 但是没带token, 跳转到登录页
-        if (localStorage.token === undefined || localStorage.token === '') {
+        if (sessionStorage.token === undefined || sessionStorage.token === '') {
             next({
                 path: '/login',
                 query: { redirect: to.fullPath }

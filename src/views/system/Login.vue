@@ -68,12 +68,12 @@ export default {
     methods: {
         handleLogin () {
             const encryptor = new JSEncrypt()
-            const publicKey = store.state.publicKey
+            const publicKey = sessionStorage.publicKey
             encryptor.setPublicKey(publicKey)
             this.loginForm.password = encryptor.encrypt(this.loginForm.password)
             this.proxy.$post('/api/authority/login', this.loginForm).then(r => {
                 if (r.code === 0) {
-                    localStorage.token = r.token
+                    sessionStorage.token = r.token
                     this.getUserInfo()
                     if (this.redirect === '') {
                         this.$router.push('/index')
@@ -91,8 +91,8 @@ export default {
         getUserInfo() {
             this.proxy.$get('/api/user/userInfo').then(r => {
                 if (r.code === 0) {
-                    console.log(r.user.username)
-                    localStorage.username = r.user.username
+                    console.log(r.user)
+                    store.state.user = r.user
                 } else {
                     ElMessage.error(r.msg)
                 }
@@ -107,7 +107,7 @@ export default {
         getPublicKey () {
             this.proxy.$get('/api/authority/publicKey').then(r => {
                 if (r.code === 0) {
-                    store.state.publicKey = r.publicKey
+                    sessionStorage.publicKey = r.publicKey
                 } else {
                     ElMessage.error(r.msg)
                 }

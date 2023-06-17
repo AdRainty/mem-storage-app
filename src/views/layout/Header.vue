@@ -27,7 +27,7 @@
 </template>
 
 <script>
-
+import store from '../../store'
 export default {
     name: 'Header',
     components: {
@@ -39,13 +39,15 @@ export default {
         }
     },
     created () {
-        this.username = localStorage.username
-        this.avatarUrl = localStorage.avatarUrl
+        this.username = store.state.user.username
+        this.avatarUrl = store.state.user.avatarUrl
     },
     methods: {
         handleLogout () {
-            localStorage.token = ''
-            localStorage.user = {}
+            sessionStorage.token = ''
+            store.state.socket.close()
+            store.state.user = {}
+            sessionStorage.user = {}
             this.$router.push('/login')
         }
     }

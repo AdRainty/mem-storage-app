@@ -59,12 +59,12 @@ export default {
     methods: {
         handleRegistry () {
             const encryptor = new JSEncrypt()
-            const publicKey = store.state.publicKey
+            const publicKey = sessionStorage.publicKey
             encryptor.setPublicKey(publicKey)
             this.registryForm.password = encryptor.encrypt(this.registryForm.password)
             this.proxy.$post('/api/authority/registry', this.registryForm).then(r => {
                 if (r.code === 200) {
-                    localStorage.token = r.token
+                    sessionStorage.token = r.token
                     this.getUserInfo()
                     if (this.redirect === '') {
                         this.$router.push('/index')
@@ -75,15 +75,13 @@ export default {
                     ElMessage.error(r.msg)
                 }
             }).catch(e => {
-                console.log(e)
-                ElMessage.error('Network Error.')
+                ElMessage.error(e)
             })
         },
         getUserInfo() {
             this.proxy.$get('/api/user/userInfo').then(r => {
                 if (r.code === 0) {
-                    console.log(r.user.username)
-                    localStorage.username = r.user.username
+                    store.state.user = r.user
                 } else {
                     ElMessage.error(r.msg)
                 }
@@ -98,7 +96,7 @@ export default {
         getPublicKey () {
             this.proxy.$get('/api/authority/publicKey').then(r => {
                 if (r.code === 0) {
-                    store.state.publicKey = r.publicKey
+                    sessionStorage.publicKey = r.publicKey
                 } else {
                     ElMessage.error(r.msg)
                 }

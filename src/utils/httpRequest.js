@@ -1,12 +1,11 @@
 import axios from 'axios'
 import router from '@/router'
-import store from '@/store'
 
 axios.defaults.baseURL = 'http://localhost:9500'
 
 axios.interceptors.request.use(
     async config => {
-        config.headers.token = localStorage.token
+        config.headers.token = sessionStorage.token
         return config
     },
     error => {
@@ -17,6 +16,11 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
+            if (response.data.code === 403) {
+                sessionStorage.token = ''
+                router.push('/login')
+                return Promise.reject(response)
+            }
             return Promise.resolve(response)
         } else {
             return Promise.reject(response)
@@ -30,7 +34,7 @@ axios.interceptors.response.use(
                     break
                 // 403 token过期
                 case 403:
-                    store.state.token = ''
+                    localStorage.token = ''
                     router.push('/login')
                     break
                 // 404请求不存在

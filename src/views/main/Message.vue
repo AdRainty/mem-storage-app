@@ -2,10 +2,10 @@
     <div class="message">
         <el-container>
             <el-aside width="300px">
-                <Friend :callback="handleSessionChange" />
+                <Friend :callback="handleSessionChange" :currentSession="currentSession" />
             </el-aside>
             <el-main>
-                <Session :currentSession="currentSession" v-if="currentSession != undefined"/>
+                <Session :currentSession="currentSession" :chatType="chatType" v-if="currentSession !== ''"/>
             </el-main>
         </el-container>
     </div>
@@ -24,7 +24,8 @@ export default {
     },
     data () {
         return {
-            currentSession: undefined
+            currentSession: '',
+            chatType: 0
         }
     },
     setup() {

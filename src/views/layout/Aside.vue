@@ -13,10 +13,6 @@
                 <el-icon><ChatLineSquare /></el-icon>
                 <span>消息</span>
             </el-menu-item>
-            <el-menu-item index="setting">
-                <el-icon><Setting /></el-icon>
-                <span>设置</span>
-            </el-menu-item>
         </el-menu>
     </div>
 </template>
@@ -38,7 +34,6 @@ export default {
     },
     methods: {
         handleOpen (key, _) {
-            console.log(key)
             this.callback(key)
         }
     }
